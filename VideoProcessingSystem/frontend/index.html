@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Video Processing System</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./script.js" defer></script>
+</head>
+<body>
+    <main class="page">
+        <header class="page-header">
+            <div>
+                <p class="eyebrow">Đề tài 14</p>
+                <h1>Hệ thống xử lý video bất đồng bộ</h1>
+                <p class="intro">Tải video lên, tạo job và theo dõi tiến trình xử lý nền.</p>
+            </div>
+            <span class="architecture">Media API · RabbitMQ · Worker</span>
+        </header>
+
+        <section class="panel" aria-labelledby="upload-title">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Bước 1</p>
+                    <h2 id="upload-title">Tải video lên</h2>
+                </div>
+            </div>
+            <form id="upload-form">
+                <label for="video-file">Chọn file video (MP4, MOV, MKV, AVI hoặc WebM; tối đa 100 MB)</label>
+                <div class="upload-row">
+                    <input
+                        id="video-file"
+                        name="file"
+                        type="file"
+                        accept=".mp4,.mov,.mkv,.avi,.webm,video/*"
+                        required>
+                    <button class="button button-primary" type="submit">Tải lên</button>
+                </div>
+            </form>
+            <p id="message" class="message" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel" aria-labelledby="videos-title">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Bước 2</p>
+                    <h2 id="videos-title">Video và job</h2>
+                </div>
+                <button id="refresh-button" class="button button-secondary" type="button">Làm mới</button>
+            </div>
+            <div id="video-list" class="video-list" aria-live="polite">
+                <p class="empty-state">Đang tải danh sách video…</p>
+            </div>
+        </section>
+
+        <footer>
+            <strong>Lưu ý:</strong> tác vụ hiện tại chỉ giả lập chuyển đổi chất lượng.
+            File video không được chuyển đổi thật.
+        </footer>
+    </main>
+</body>
+</html>
