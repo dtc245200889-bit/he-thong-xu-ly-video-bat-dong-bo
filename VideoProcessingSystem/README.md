@@ -60,6 +60,26 @@ Giữ cả API và Worker đang chạy trong khi sử dụng ứng dụng.
 4. Giao diện hiển thị tiến trình và tự làm mới trạng thái đến khi job hoàn tất.
 5. Chọn làm mới danh sách để xem video và kết quả đã lưu.
 
+## Thử bằng ApiClient
+
+Sau khi khởi động Media API và Media Worker, chạy từ thư mục `VideoProcessingSystem`:
+
+```powershell
+dotnet run --project .\ApiClient\ApiClient.csproj
+```
+
+ApiClient mặc định gọi `http://localhost:5000`; có thể truyền URL API và ID video tùy chọn:
+
+```powershell
+dotnet run --project .\ApiClient\ApiClient.csproj -- http://localhost:5000 <video-id>
+```
+
+Client đọc danh sách video, tạo job cho video đầu tiên (hoặc ID được truyền vào), đọc lại job,
+rồi thử loại job không hỗ trợ, request thiếu `TaskType` và ID video không tồn tại. Các lỗi HTTP
+được hiển thị cùng mã lỗi và thông điệp; lỗi kết nối và JSON không hợp lệ được báo riêng.
+Nếu chưa có video, hãy tải video lên bằng frontend trước. API trả DTO công khai, không trả
+đường dẫn lưu trữ nội bộ của file.
+
 ## Thử API bằng PowerShell
 
 Thay đường dẫn ví dụ bên dưới bằng đường dẫn đến file video của bạn:

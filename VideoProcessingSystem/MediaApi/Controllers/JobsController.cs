@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using MediaApi.Messaging;
 using MediaApi.Models;
 using MediaApi.Services;
@@ -13,20 +12,20 @@ public sealed class JobsController(
     ILogger<JobsController> logger) : ControllerBase
 {
     [HttpPost("videos/{videoId:guid}/jobs")]
-    [ProducesResponseType(typeof(Job), StatusCodes.Status202Accepted)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Job>> Create(
+    [ProducesResponseType(typeof(JobDto), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ApiError), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiError), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiError), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<JobDto>> Create(
         Guid videoId,
         CreateJobRequest request,
         CancellationToken cancellationToken)
     {
         if (!JobService.IsSupportedTaskType(request.TaskType))
         {
-            return BadRequest(new
-            {
-                message = $"TaskType phải là '{JobService.SimulatedTranscodeTask}'."
-            });
+            return BadRequest(new ApiError(
+                "UNSUPPORTED_TASK_TYPE",
+                $"TaskType phải là '{JobService.SimulatedTranscodeTask}'."));
         }
 
         var job = await jobService.CreateAsync(
@@ -35,7 +34,7 @@ public sealed class JobsController(
 
         if (job is null)
         {
-            return NotFound(new { message = $"Video {videoId} không tồn tại." });
+            return NotFound(new ApiError("VIDEO_NOT_FOUND", $"Video {videoId} không tồn tại."));
         }
 
         try
@@ -50,26 +49,22 @@ public sealed class JobsController(
                 "Không thể gửi job vào RabbitMQ.",
                 cancellationToken);
 
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new
-            {
-                message = "RabbitMQ hiện không khả dụng.",
-                jobId = job.Id
-            });
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                new ApiError("RABBITMQ_UNAVAILABLE", "RabbitMQ hiện không khả dụng."));
         }
 
-        return AcceptedAtAction(nameof(GetById), new { id = job.Id }, job);
+        return AcceptedAtAction(nameof(GetById), new { id = job.Id }, JobDto.From(job));
     }
 
     [HttpGet("jobs/{id:guid}")]
-    [ProducesResponseType(typeof(Job), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Job>> GetById(Guid id, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(JobDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiError), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<JobDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
         var job = await jobService.GetByIdAsync(id, cancellationToken);
         return job is null
-            ? NotFound(new { message = $"Job {id} không tồn tại." })
-            : Ok(job);
+            ? NotFound(new ApiError("JOB_NOT_FOUND", $"Job {id} không tồn tại."))
+            : Ok(JobDto.From(job));
     }
 }
-
-public sealed record CreateJobRequest([Required] string TaskType);

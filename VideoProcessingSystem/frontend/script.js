@@ -69,7 +69,7 @@ function renderResult(job) {
     }
 
     const result = createElement("div", "result");
-    result.append(createElement("p", "", `File kết quả: ${job.result.outputFilePath}`));
+    result.append(createElement("p", "", "Kết quả xử lý đã được lưu."));
 
     if (job.result.metadataJson) {
         const pre = createElement("pre");
